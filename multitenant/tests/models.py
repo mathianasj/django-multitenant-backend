@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
 
-from django.db import models
+from django.db import models, IntegrityError
 from django.conf import settings
 
 from multitenant.models import *
@@ -11,7 +11,7 @@ from multitenant.middleware import set_current_tenant
 
 
 class TenantModelTests(TestCase):
- 
+
     def setUp(self):
         # Tenant and logged in user setup
         self.tenant1 = Tenant.objects.create(name='Tenant1', email='tenant1@example.com')
@@ -25,15 +25,21 @@ class TenantModelTests(TestCase):
         if not getattr(user_profile_class, 'tenant'):
             raise TypeError('The User profile class for this project MUST be derived from TenantModel.')
 
-        user_profile_class.objects.create(user=self.user, tenant=self.tenant1)    # This will fail if any of the fields other than user are required fields
+        try:
+            # This will fail if any of the fields other than user are required fields
+            user_profile_class.objects.create(user=self.user, tenant=self.tenant1)
+        except IntegrityError:
+            # looks like user profile is created automatically via a signal
+            pass
+
         self.client = Client()
         self.client.login(username=self.user.username, password='123')
 
-    
+
     def tearDown(self):
         pass
 
-    
+
     def test_tenant_set_while_saving(self):
         # Tenant aware objects setup
         set_current_tenant(self.tenant1)
@@ -41,7 +47,7 @@ class TenantModelTests(TestCase):
         obj1.clean()    # This is where the tenant gets set automatically
         obj1.save()
         self.assertEqual(obj1.tenant, get_current_tenant())
-        
+
     def test_custom_manager(self):
         # Verify that the custom manager filters the queryset as per the currently logged in user
         set_current_tenant(self.tenant1)

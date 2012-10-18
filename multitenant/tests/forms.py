@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.test.client import Client
 
-from django.db import models
+from django.db import models, IntegrityError
 from django.conf import settings
 
 from multitenant.models import *
@@ -12,7 +12,7 @@ from multitenant.middleware import set_current_tenant
 
 
 class TenantFormTests(TestCase):
- 
+
     def setUp(self):
         # Tenant and logged in user setup
         self.tenant1 = Tenant.objects.create(name='Tenant1', email='tenant1@example.com')
@@ -26,13 +26,19 @@ class TenantFormTests(TestCase):
         if not getattr(user_profile_class, 'tenant'):
             raise TypeError('The User profile class for this project MUST be derived from TenantModel.')
 
-        user_profile_class.objects.create(user=self.user, tenant=self.tenant1)    # This will fail if any of the fields other than user are required fields
+        try:
+            # This will fail if any of the fields other than user are required fields
+            user_profile_class.objects.create(user=self.user, tenant=self.tenant1)
+        except IntegrityError:
+            # looks like user profile is created automatically via a signal
+            pass
+
         self.client = Client()
         self.client.login(username=self.user.username, password='123')
 
     def tearDown(self):
         pass
-    
+
     def test_tenant_model_form(self):
         set_current_tenant(self.tenant1)
         obj1 = TestTenantAwareModel.objects.create(name='obj1', tenant=self.tenant1)
@@ -42,7 +48,7 @@ class TenantFormTests(TestCase):
             class Meta:
                 model = TestTenantAwareModel
                 exclude = ['tenant']
-                
+
 
         form = TestForm({ 'name': 'blah', 'm2mfield': [ obj1.id ] })
         fk_options = form.fields['fkfield'].queryset
@@ -56,4 +62,3 @@ class TenantFormTests(TestCase):
         self.assertEqual(form.is_valid(), True, 'Form is not valid')
         instance = form.save()
         self.assertEqual(instance.tenant, self.tenant1)
-        
