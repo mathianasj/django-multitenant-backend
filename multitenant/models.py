@@ -13,9 +13,9 @@ TenantModels have a tenant-aware manager called tenant_objects:
     bugs = BugReport.tenant_objects.all()
 
 This will bring up all instances owned by the "current tenant".
-The current tenant, for a given request, is determined by checking the tenant field 
+The current tenant, for a given request, is determined by checking the tenant field
 of the user profile for request.user.
-If it's an anonymous user, the current tenant will be the base tenant.  
+If it's an anonymous user, the current tenant will be the base tenant.
 """
 
 from django.db import models
@@ -42,7 +42,7 @@ class Tenant(models.Model):
     This is the key model used to manage multitenancy.
     Many tenants will use the database at the same time; any model that must be tenant-specific will need
     a foreign-key relation to Tenant.
-    
+
     It is critical that the "user profile" model also have a foreign key relation to Tenant.
     """
     name = models.CharField(
@@ -53,10 +53,13 @@ class Tenant(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
 
 class TenantModel(models.Model):
     tenant = models.ForeignKey(Tenant)
-    
+
     # Django gives special treatment to the first Manager declared within a Model; it becomes the default manager.
     # There are some corner cases when you don't want the tenant-aware manager to be the default one, for example
     # when running django management commands.
@@ -66,24 +69,24 @@ class TenantModel(models.Model):
     def clean(self):
         """
         Here we take care of setting the tenant for any model instance that has a foreign key to the Tenant model.
-        
+
         The exception is UserProfile - the UserProfile's tenant gets set when first saved, and from then on
-        it can be changed by the current user to something else than the current user's tenant.        
-        This is useful for the Superuser, who can change his own UserProfile tenant.  That lets him slip into any 
+        it can be changed by the current user to something else than the current user's tenant.
+        This is useful for the Superuser, who can change his own UserProfile tenant.  That lets him slip into any
         tenant's account.
-        
+
         It's better to set the tenant here in clean() instead of save().  clean() gets called automatically when you
         save a form, but not when you create instances programatically - in that case you must call clean() yourself.
-        That gives a lot of flexibility: in some cases, you might want to set or change the tenant from the code; all 
+        That gives a lot of flexibility: in some cases, you might want to set or change the tenant from the code; all
         you need to do is avoid calling clean() after setting the value and it won't be overwritten.
         """
-        
+
         user_profile_class = get_profile_class()
         if hasattr(self, 'tenant_id') and not ( isinstance(self, user_profile_class) and self.id ):
             self.tenant = get_current_tenant()
-            
-        super(TenantModel, self).clean() 
-        
+
+        super(TenantModel, self).clean()
+
     class Meta:
         abstract = True
 
@@ -93,7 +96,7 @@ class TestTenantAwareModel(TenantModel):
     name = models.CharField(max_length=10)
     fkfield = models.ForeignKey("self", blank=True, null=True)
     m2mfield = models.ManyToManyField("self")
-    
+
 
 
 def clone_model_instance(instance, new_values={}):
@@ -109,7 +112,7 @@ def clone_model_instance(instance, new_values={}):
     return instance
 
 
-def clone_base_tenant(sender, instance, created, **kwargs): 
+def clone_base_tenant(sender, instance, created, **kwargs):
     """
     Runs through all tenant-informed models, and copies each base tenant instance to an instance for the current tenant.
     """
@@ -137,7 +140,7 @@ def clone_model(model_class, source_tenant=BASE_TENANT_ID, dest_tenant='current_
     """
     if dest_tenant == 'current_tenant':
         dest_tenant = get_current_tenant()
-        
+
     if issubclass(model_class, TenantModel):
         qs = model_class.objects.filter(tenant=source_tenant).order_by('id')
         for i in qs:
@@ -158,5 +161,5 @@ def get_profile_class_old():
         return users[0].get_profile().__class__
     else:
         return None
- 
- 
+
+
