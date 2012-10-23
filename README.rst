@@ -125,6 +125,25 @@ example::
 	    'multitenant',
     )	
 	
+Middleware
+----------
+To have the tenant set automatically, add the middleware straight after
+`django.contrib.auth.middleware.AuthenticationMiddleware`.
+example::
+
+    MIDDLEWARE_CLASSES = (
+        'django.middleware.common.CommonMiddleware',
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'multitenant.middleware.ThreadLocals',
+        ...
+    )
+
+**WARNING**
+The middleware uses threadlocals which isn't universally considered a good idea.
+
+
 User Profile
 ------------
 You must have a "user profile" model, and it must subclass TenantModel. 
