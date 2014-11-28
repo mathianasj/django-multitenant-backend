@@ -1,12 +1,20 @@
-This django app helps manage multi tenancy.  Your web application can have several tenants, each with several users.  
-The users from one tenant are not allowed to see the data (model instances) that belong to another tenant.  
+This Django app helps manage multi tenancy.  Your web application can have several tenants, each with several users.  
+The users from one tenant are not allowed to see the data (model instances) that belong to another tenant.
 
-This is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
+Here is a good introduction on multi-tenancy: http://msdn.microsoft.com/en-us/library/aa479086.aspx
+
+This app implements the shared approach: partition data using a tenant key in each table. 
+Other approaches are to use database schemas (as supported in Postgres) with https://github.com/bernardopires/django-tenant-schemas
+or to use multiple databases with https://github.com/mik3y/django-db-multitenant 
+
+
+Partitioning here is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
 name and email.  Any other model in your django project can be made "tenant-aware" by adding a ForeignKey field pointed at 
 that Tenant model.
 
 django-simple-multitenant helps reduce the amount of boilerplate code you need to make your models tenant-aware.
 
+Note: I did not create this, I just happen to the oldest fork alive...
 
 How to use
 ==========
