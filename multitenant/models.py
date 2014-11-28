@@ -29,12 +29,12 @@ from settings import BASE_TENANT_ID
 
 
 class TenantMgr(models.Manager):
-    def get_query_set(self):
+    def get_queryset(self):
         tenant = get_current_tenant()
         if tenant:
-            return super(TenantMgr, self).get_query_set().filter(tenant=tenant)
+            return super(TenantMgr, self).get_queryset().filter(tenant=tenant)
         else:
-            return super(TenantMgr, self).get_query_set()
+            return super(TenantMgr, self).get_queryset()
 
 
 class Tenant(models.Model):
