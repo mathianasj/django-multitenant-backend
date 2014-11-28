@@ -3,9 +3,13 @@ The users from one tenant are not allowed to see the data (model instances) that
 
 Here is a good introduction on multi-tenancy: http://msdn.microsoft.com/en-us/library/aa479086.aspx
 
-This app implements the shared approach: partition data using a tenant key in each table. 
-Other approaches are to use database schemas (as supported in Postgres) with https://github.com/bernardopires/django-tenant-schemas
-or to use multiple databases with https://github.com/mik3y/django-db-multitenant 
+This app implements the shared approach: partition data using a tenant key in each table.
+
+Note: I did not create this, I just happen to the oldest fork alive... and this fork is not especially maintained.
+Also the license is the GNU Affero General Public License v3 which makes it somewhat impractical for anything that would not be free and open source applications.
+
+The are other approaches to consider: use database schemas (as supported in Postgres) with https://github.com/bernardopires/django-tenant-schemas
+or use multiple databases with https://github.com/mik3y/django-db-multitenant 
 
 
 Partitioning here is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
@@ -13,8 +17,6 @@ name and email.  Any other model in your django project can be made "tenant-awar
 that Tenant model.
 
 django-simple-multitenant helps reduce the amount of boilerplate code you need to make your models tenant-aware.
-
-Note: I did not create this, I just happen to the oldest fork alive...
 
 How to use
 ==========
