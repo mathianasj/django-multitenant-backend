@@ -4,19 +4,11 @@ from distutils.core import setup
 #     http://docs.python.org/distutils/setupscript.html#meta-data
 #     http://pypi.python.org/pypi?%3Aaction=list_classifiers
 
-# Backward compatibility with older Python
-# patch distutils if it can't cope with the "classifiers" or
-# "download_url" keywords
 from sys import version
-if version < '2.2.3':
-    from distutils.dist import DistributionMetadata
-    DistributionMetadata.classifiers = None
-    DistributionMetadata.download_url = None
 
-    
 setup(
     name='django-simple-multitenant',
-    version='0.1.0',
+    version='0.2.0',
     author='Daniel Romaniuk',
     author_email='daniel.romaniuk@gmail.com',
     packages=['multitenant',],
