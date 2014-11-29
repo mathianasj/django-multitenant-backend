@@ -1,18 +1,30 @@
 This Django app helps manage multi tenancy.  Your web application can have several tenants, each with several users.  
 The users from one tenant are not allowed to see the data (model instances) that belong to another tenant.
 
-Here is a good introduction on multi-tenancy: http://msdn.microsoft.com/en-us/library/aa479086.aspx
+Here is a good introduction on multi-tenancy approaches: http://msdn.microsoft.com/en-us/library/aa479086.aspx
 
 This app implements the shared approach: partition data using a tenant key in each table.
 
-Note: I did not create this, I just happen to the oldest fork alive... and this fork is not especially maintained.
-Also the license is the GNU Affero General Public License v3 which makes it somewhat impractical for anything that would not be free and open source applications.
+Note: I did not create this, I just happen to be the oldest fork alive... and this fork is not especially maintained.
+Also, the license is the GNU Affero General Public License v3 which makes it somewhat impractical for anything that would not be free and open source applications.
 
-The are other approaches to consider: use database schemas (as supported in Postgres) with https://github.com/bernardopires/django-tenant-schemas
-or use multiple databases with https://github.com/mik3y/django-db-multitenant 
+There are other approaches to consider:
+
+ * use database schemas (as supported in Postgres)
+  * https://github.com/bernardopires/django-tenant-schemas and https://github.com/maciej-gol/tenant-schemas-celery
+  * https://github.com/charettes/django-tenancy
+  * https://bitbucket.org/schinckel/django-boardinghouse
+ * or use multiple databases:
+  * https://github.com/mik3y/django-db-multitenant
+ * or use django "sites":
+  * https://bitbucket.org/uysrc/django-dynamicsites
+  * https://github.com/ecometrica/django-multisite
+  * https://github.com/jezdez/django-hosts
+  
+Some related utils include: https://github.com/grampajoe/django-tenant-templates
 
 
-Partitioning here is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
+That said, partitioning here is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
 name and email.  Any other model in your django project can be made "tenant-aware" by adding a ForeignKey field pointed at 
 that Tenant model.
 
