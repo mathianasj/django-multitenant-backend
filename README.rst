@@ -1,34 +1,44 @@
-This Django app helps manage multi tenancy.  Your web application can have several tenants, each with several users.  
-The users from one tenant are not allowed to see the data (model instances) that belong to another tenant.
+Multitenancy is a way to support multiple isolated clients or tenants with a shared server deployment. See http://en.wikipedia.org/wiki/Multitenancy for details and a good introduction on multitenancy approaches: http://msdn.microsoft.com/en-us/library/aa479086.aspx 
 
-Here is a good introduction on multi-tenancy approaches: http://msdn.microsoft.com/en-us/library/aa479086.aspx
+This Django app implements the shared approach: partitionionig data using a tenant key in each table. It helps manage multitenancy.  Your web application can have several tenants, each with several users.  The users from one tenant are not allowed to see the data (model instances) that belong to another tenant.
 
-This app implements the shared approach: partition data using a tenant key in each table.
-
-Note: I did not create this, I just happen to be the oldest fork alive... and this fork is not especially maintained.
+Note: I did not create this, I just happen to be the oldest fork alive. The original author is Daniel Romaniuk... and this fork is not especially maintained.
 Also, the license is the GNU Affero General Public License v3 which makes it somewhat impractical for anything that would not be free and open source applications.
 
-There are other approaches to consider:
+Here are other approaches to consider for Django::
+ * use primary key partitioning as here:
+  * https://github.com/bigsassy/django-multi-tenant (last updated 02-2013, unknown license)
+  * https://github.com/hugotox/django-tenant-filter (last updated late 2014, BSD license)
 
- * use database schemas (as supported in Postgres)
-  * https://github.com/bernardopires/django-tenant-schemas and https://github.com/maciej-gol/tenant-schemas-celery
-  * https://github.com/charettes/django-tenancy
-  * https://bitbucket.org/schinckel/django-boardinghouse
- * or use multiple databases:
-  * https://github.com/mik3y/django-db-multitenant
- * or use django "sites":
+ * or use database schemas partitioning (as supported in Postgres, so generally database-specific):
+  * https://bitbucket.org/schinckel/django-boardinghouse (lastupdated late 2014, BSD license, flexible routing)
+  * https://github.com/charettes/django-tenancy (last updated late 2014, MIT license, host-based or flexible routing, core django developer)
+  * https://github.com/bernardopires/django-tenant-schemas (last updated late 2014, MIT license, subdomain-based routing)
+   * See also and https://github.com/maciej-gol/tenant-schemas-celery and http://www.reddit.com/r/django/comments/2f5jlk/how_to_plan_django_multi_tenant_application/
+
+  * https://github.com/Walkman/django-tenants (last updated late 2013, MIT license, domain-based routing)
+  * https://bitbucket.org/cedarlab/django-appschema/ (last updated mid 2011, MIT license, domain-based routing)
+  * https://github.com/tuttle/django-schemata/ (last updated mid 2012, MIT license, domain-based routing)
+   * a fork last updated fall 2013: https://github.com/creat1va/django-schemata/
+
+  * See also on schemas:
+   * https://code.djangoproject.com/ticket/6148
+   * https://news.ycombinator.com/item?id=1565674
+
+ * or use multiple databases partitioning:
+  * https://github.com/mik3y/django-db-multitenant (last updated fall 2013, Apache license, host-based or flexible routing)
+
+ * or use django "sites" partitioning:
   * https://bitbucket.org/uysrc/django-dynamicsites
   * https://github.com/ecometrica/django-multisite
   * https://github.com/jezdez/django-hosts
+  * https://bitbucket.org/wardi/django-dynamicsites-lite
   
-Some related utils include: https://github.com/grampajoe/django-tenant-templates
-
+Some related utils include: https://github.com/grampajoe/django-tenant-templates (last updated spring 2014, MIT license)
 
 That said, partitioning here is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
 name and email.  Any other model in your django project can be made "tenant-aware" by adding a ForeignKey field pointed at 
-that Tenant model.
-
-django-simple-multitenant helps reduce the amount of boilerplate code you need to make your models tenant-aware.
+that Tenant model. django-simple-multitenant helps reduce the amount of boilerplate code you need to make your models tenant-aware.
 
 How to use
 ==========
@@ -269,3 +279,21 @@ When you first run syncdb with the multitenant app installed, you may run into a
 The user profile model must subclass TenantModel; it has a foreign key relation to Tenant.  To create a new user profile, you must first create
 a Tenant instance.
 
+
+License
+-------
+django-multitenant, a tool to help manage multitenancy for django projects
+Copyright (C) 2011, Daniel Romaniuk
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>
