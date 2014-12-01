@@ -9,6 +9,7 @@ Here are other approaches to consider for Django::
  * use primary key partitioning as here:
   * https://github.com/bigsassy/django-multi-tenant (last updated 02-2013, unknown license)
   * https://github.com/hugotox/django-tenant-filter (last updated late 2014, BSD license)
+  * https://github.com/pombredanne/django-simple-multitenant (this repo) (last seriously updated mid 2012, Affero GPL license)
 
  * or use database schemas partitioning (as supported in Postgres, so generally database-specific):
   * https://bitbucket.org/schinckel/django-boardinghouse (lastupdated late 2014, BSD license, flexible routing)
