@@ -32,4 +32,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['multitenant']
+    complete_apps = ['multitenant_backend']

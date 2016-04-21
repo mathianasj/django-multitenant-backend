@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import find_packages, setup
 
 # Ref: 
 #     http://docs.python.org/distutils/setupscript.html#meta-data
@@ -11,7 +11,7 @@ setup(
     version='0.3.0',
     author='Joshua Mathianas',
     author_email='mathianasj@gmail.com',
-    packages=['multitenant_backend',],
+    packages=find_packages(),
     url='https://github.com/mathianasj/django-multitenant-backend',
     license='LICENSE.txt',
     description='Helps manage multi tenancy for django projects',

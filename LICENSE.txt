@@ -1,5 +1,5 @@
-django-multitenant, a tool to help manage multitenancy for django projects
-Copyright (C) 2011, Daniel Romaniuk
+django-multitenant-backend, a tool to help manage multitenancy for django projects
+Copyright (C) 2016, Joshua Mathianas
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

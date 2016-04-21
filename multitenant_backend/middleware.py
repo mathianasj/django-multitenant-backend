@@ -6,7 +6,7 @@ except ImportError:
     
 from django.db import connection
     
-from multitenant import models
+from multitenant_backend import models
 from django.core import exceptions as djangoexceptions
 
 import logging
@@ -23,7 +23,7 @@ def set_tenant_to_default():
     Sets the current tenant as per BASE_TENANT_ID.
     """
     # import is done from within the function, to avoid trouble 
-    from multitenant.models import Tenant, BASE_TENANT_ID
+    from multitenant_backend.models import Tenant, BASE_TENANT_ID
     set_current_tenant( Tenant.objects.get(id=BASE_TENANT_ID) )
     
 

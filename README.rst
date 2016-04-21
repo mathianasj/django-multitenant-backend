@@ -2,40 +2,8 @@ Multitenancy is a way to support multiple isolated clients or tenants with a sha
 
 This Django app implements the shared approach: partitionionig data using a tenant key in each table. It helps manage multitenancy.  Your web application can have several tenants, each with several users.  The users from one tenant are not allowed to see the data (model instances) that belong to another tenant.
 
-Note: I did not create this, I just happen to be the oldest fork alive. The original author is Daniel Romaniuk... and this fork is not especially maintained.
-Also, the license is the GNU Affero General Public License v3 which makes it somewhat impractical for anything that would not be free and open source applications.
-
-Here are other approaches to consider for Django::
- * use primary key partitioning as here:
-  * https://github.com/bigsassy/django-multi-tenant (last updated 02-2013, unknown license)
-  * https://github.com/hugotox/django-tenant-filter (last updated late 2014, BSD license)
-  * https://github.com/pombredanne/django-simple-multitenant (this repo) (last seriously updated mid 2012, Affero GPL license)
-
- * or use database schemas partitioning (as supported in Postgres, so generally database-specific):
-  * https://bitbucket.org/schinckel/django-boardinghouse (lastupdated late 2014, BSD license, flexible routing)
-  * https://github.com/charettes/django-tenancy (last updated late 2014, MIT license, host-based or flexible routing, core django developer)
-  * https://github.com/bernardopires/django-tenant-schemas (last updated late 2014, MIT license, subdomain-based routing)
-   * See also and https://github.com/maciej-gol/tenant-schemas-celery and http://www.reddit.com/r/django/comments/2f5jlk/how_to_plan_django_multi_tenant_application/
-
-  * https://github.com/Walkman/django-tenants (last updated late 2013, MIT license, domain-based routing)
-  * https://bitbucket.org/cedarlab/django-appschema/ (last updated mid 2011, MIT license, domain-based routing)
-  * https://github.com/tuttle/django-schemata/ (last updated mid 2012, MIT license, domain-based routing)
-   * a fork last updated fall 2013: https://github.com/creat1va/django-schemata/
-
-  * See also on schemas:
-   * https://code.djangoproject.com/ticket/6148
-   * https://news.ycombinator.com/item?id=1565674
-
- * or use multiple databases partitioning:
-  * https://github.com/mik3y/django-db-multitenant (last updated fall 2013, Apache license, host-based or flexible routing)
-
- * or use django "sites" partitioning:
-  * https://bitbucket.org/uysrc/django-dynamicsites
-  * https://github.com/ecometrica/django-multisite
-  * https://github.com/jezdez/django-hosts
-  * https://bitbucket.org/wardi/django-dynamicsites-lite
-  
-Some related utils include: https://github.com/grampajoe/django-tenant-templates (last updated spring 2014, MIT license)
+Note: I have adapted this version from https://github.com/pombredanne/django-simple-multitenant to support the latest version python and django.  The creation of a backend wrapper around mysql db backend enables the use of direct sql modifictions for the tenant id when using 
+lazy fetch and serilization with django rest framework.  There is no longer a need to modify any existing code to implement a shared database key multitenancy.  It would be best to partition your database tables based on the tenant ids to help segment the data.
 
 That said, partitioning here is done at the database table (django model) level.  At the core is a model called Tenant, with only two fields: 
 name and email.  Any other model in your django project can be made "tenant-aware" by adding a ForeignKey field pointed at 
