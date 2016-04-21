@@ -16,17 +16,12 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
     
-    def forwards_func(apps, schema_editor):
+    def forwards(apps, schema_editor):
         Tenant = apps.get_model("multitenant_backend", "Tenant")
         db_alias = schema_editor.connection.alias
         Tenant.objects.using(db_alias).bulk_create([
             Tenant(name="default", email="foo@bar.com")
         ])
-        
-    def reverse_func(apps, schema_editor):
-        Tenant = apps.get_model("multitenant_backend", "Tenant")
-        db_alias = schema_editor.connection.alias
-        Tenant.objects.using(db_alias).filter(name="default", email="foo@bar.com").delete()
 
     operations = [
         migrations.CreateModel(
@@ -37,6 +32,7 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(max_length=254)),
             ],
         ),
+        migrations.RunPython(forwards),
         migrations.CreateModel(
             name='UserProfile',
             fields=[
