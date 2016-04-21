@@ -7,12 +7,12 @@ from distutils.core import setup
 from sys import version
 
 setup(
-    name='django-simple-multitenant',
-    version='0.2.0',
-    author='Daniel Romaniuk',
-    author_email='daniel.romaniuk@gmail.com',
-    packages=['multitenant',],
-    url='https://github.com/phugoid/django-simple-multitenant',
+    name='django-multitenant-backend',
+    version='0.3.0',
+    author='Joshua Mathianas',
+    author_email='mathianasj@gmail.com',
+    packages=['multitenant_backend',],
+    url='https://github.com/mathianasj/django-multitenant-backend',
     license='LICENSE.txt',
     description='Helps manage multi tenancy for django projects',
     long_description=open('README.rst').read(),

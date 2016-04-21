@@ -18,21 +18,23 @@ of the user profile for request.user.
 If it's an anonymous user, the current tenant will be the base tenant.
 """
 
+from django.apps import apps
 from django.db import models
 from django.db.models.signals import post_save
 from django.contrib.auth.models import User
 from django.conf import settings    # We look at DEBUG only, from settings
 from django.contrib.contenttypes.models import ContentType
+from django.db.models.fields import related_lookups
+from django.db.models import lookups
 
-from middleware import get_current_tenant
-from settings import BASE_TENANT_ID
+from multitenant.settings import BASE_TENANT_ID
 
 
 class TenantMgr(models.Manager):
     def get_queryset(self):
-        tenant = get_current_tenant()
+        tenant = Tenant()
         if tenant:
-            return super(TenantMgr, self).get_queryset().filter(tenant=tenant)
+            return super(TenantMgr, self).get_queryset().filter(tenant="{{tenant_id}}")
         else:
             return super(TenantMgr, self).get_queryset()
 
@@ -57,46 +59,41 @@ class Tenant(models.Model):
         return self.get(name=name)
 
 
+class RelatedExact(related_lookups.RelatedLookupMixin, lookups.Exact):
+    def get_prep_lookup(self):
+        return "{{tenant_id}}"
+
+
+class TenantForeignKey(models.ForeignKey):
+    def get_lookup(self, lookup_name):
+        print('captured {}'.format(lookup_name))
+        return RelatedExact
+        
+    def get_db_prep_save(self, value, connection):
+        return "{{tenant_id}}"
+
 class TenantModel(models.Model):
-    tenant = models.ForeignKey(Tenant)
+    tenant = TenantForeignKey(Tenant)
 
     # Django gives special treatment to the first Manager declared within a Model; it becomes the default manager.
     # There are some corner cases when you don't want the tenant-aware manager to be the default one, for example
     # when running django management commands.
-    objects = models.Manager()
+    objects = TenantMgr()
     tenant_objects = TenantMgr()
-
-    def clean(self):
-        """
-        Here we take care of setting the tenant for any model instance that has a foreign key to the Tenant model.
-
-        The exception is UserProfile - the UserProfile's tenant gets set when first saved, and from then on
-        it can be changed by the current user to something else than the current user's tenant.
-        This is useful for the Superuser, who can change his own UserProfile tenant.  That lets him slip into any
-        tenant's account.
-
-        It's better to set the tenant here in clean() instead of save().  clean() gets called automatically when you
-        save a form, but not when you create instances programatically - in that case you must call clean() yourself.
-        That gives a lot of flexibility: in some cases, you might want to set or change the tenant from the code; all
-        you need to do is avoid calling clean() after setting the value and it won't be overwritten.
-        """
-
-        user_profile_class = get_profile_class()
-        if hasattr(self, 'tenant_id') and not ( isinstance(self, user_profile_class) and self.id ):
-            self.tenant = get_current_tenant()
-
-        super(TenantModel, self).clean()
+    
+    
+    
+    def save(self, *args, **kwargs):
+        if hasattr(self, 'tenant_id') and not ( isinstance(self, UserProfile) ):
+            self.tenant = Tenant(id='{{tenant_id}}')
+        
+        super(TenantModel, self).save(*args, **kwargs)
 
     class Meta:
         abstract = True
 
-
-# For testing purposes only
-class TestTenantAwareModel(TenantModel):
-    name = models.CharField(max_length=10)
-    fkfield = models.ForeignKey("self", blank=True, null=True)
-    m2mfield = models.ManyToManyField("self")
-
+class UserProfile(TenantModel):
+    user = models.OneToOneField(User)
 
 
 def clone_model_instance(instance, new_values={}):
@@ -120,11 +117,10 @@ def clone_base_tenant(sender, instance, created, **kwargs):
     # Don't clone anything when loading fixtures (when raw==True)
     if created and not kwargs.get('raw', False):
 
-        user_profile_class = get_profile_class()
-        all_model_classes = models.get_models()
+        all_model_classes = apps.get_models()
 
         for model_class in all_model_classes:
-            if issubclass(model_class, TenantModel) and model_class is not user_profile_class:
+            if issubclass(model_class, TenantModel) and not issubclass(model_class, UserProfile):
                 qs = model_class.objects.filter(tenant=BASE_TENANT_ID).order_by('id')
                 for i in qs:
                     clone_model_instance(i, { 'tenant': instance })
@@ -145,13 +141,6 @@ def clone_model(model_class, source_tenant=BASE_TENANT_ID, dest_tenant='current_
         qs = model_class.objects.filter(tenant=source_tenant).order_by('id')
         for i in qs:
             clone_model_instance(i, { 'tenant': dest_tenant })
-
-
-
-def get_profile_class():
-    app_label, model = settings.AUTH_PROFILE_MODULE.split('.')
-    content_type = ContentType.objects.get(app_label=app_label, model=model.lower())
-    return content_type.model_class()
 
 
 def get_profile_class_old():
