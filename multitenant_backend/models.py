@@ -27,7 +27,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.fields import related_lookups
 from django.db.models import lookups
 
-from multitenant.settings import BASE_TENANT_ID
+from multitenant_backend.settings import BASE_TENANT_ID
 
 
 class TenantMgr(models.Manager):
