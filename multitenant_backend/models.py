@@ -125,7 +125,7 @@ def clone_base_tenant(sender, instance, created, **kwargs):
                 for i in qs:
                     clone_model_instance(i, { 'tenant': instance })
 
-post_save.connect(clone_base_tenant, sender=Tenant)
+#post_save.connect(clone_base_tenant, sender=Tenant)
 
 
 def clone_model(model_class, source_tenant=BASE_TENANT_ID, dest_tenant='current_tenant'):
