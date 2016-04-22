@@ -37,7 +37,7 @@ def set_current_tenant(tenant):
 
 def get_current_tenant():
     logger.info("getting tenant from thread local")
-    return _thread_locals.tenant
+    return getattr(_thread_locals, 'tenant', None)
 
 
 class ThreadLocals(object):
