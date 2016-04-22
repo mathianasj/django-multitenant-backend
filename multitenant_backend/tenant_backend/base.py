@@ -3,6 +3,9 @@
 from django.conf import settings
 from types import MethodType
 from threadlocals.threadlocals import get_current_request
+import logging
+
+logger = logging.getLogger("multitenant")
 
 try:
     # Django versions >= 1.9
@@ -40,14 +43,14 @@ class DatabaseWrapper(original_backend.DatabaseWrapper):
         Main API method to current database schema,
         but it does not actually modify the db connection.
         """
-        print("setting tenant in connection to {}".format(tenant))
+        logger.debug("setting tenant in connection to {}".format(tenant))
         self.tenant = tenant
 
     def set_schema_to_public(self):
         """
         Instructs to stay in the common 'public' schema.
         """
-        print('setting schema to public')
+        logger.info('setting schema to public')
         self.tenant = DefaultTenant()
 
     def _cursor(self):
@@ -75,11 +78,11 @@ class DatabaseWrapper(original_backend.DatabaseWrapper):
                 orig = cursor.execute
                 tenant = self.tenant
                 def new_exec(self, query, args=None):
-                    print('override sql {}'.format(query))
+                    logger.debug('override sql {}'.format(query))
                     if tenant:
-                        print("current tenant id: {}".format(tenant.id))
+                        logger.debug("current tenant id: {}".format(tenant.id))
                         if(args):
-                            print("about to replace {{tenant_id}}")
+                            logger.info("about to replace {{tenant_id}}")
                             mut_args = []
                             for x in args:
                                 if(x == '{{tenant_id}}'):
@@ -87,8 +90,6 @@ class DatabaseWrapper(original_backend.DatabaseWrapper):
                                 else:
                                     mut_args.append(x)
                             
-                            print(args)
-                            print(mut_args)
                             args = tuple(mut_args)
                     
                     return orig(query, args)
