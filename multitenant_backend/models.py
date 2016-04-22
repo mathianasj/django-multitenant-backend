@@ -28,6 +28,9 @@ from django.db.models.fields import related_lookups
 from django.db.models import lookups
 
 from multitenant_backend.settings import BASE_TENANT_ID
+import logging
+
+logger = logging.getLogger("multitenant")
 
 
 class TenantMgr(models.Manager):
@@ -66,7 +69,7 @@ class RelatedExact(related_lookups.RelatedLookupMixin, lookups.Exact):
 
 class TenantForeignKey(models.ForeignKey):
     def get_lookup(self, lookup_name):
-        print('captured {}'.format(lookup_name))
+        logger.debug('captured {}'.format(lookup_name))
         return RelatedExact
         
     def get_db_prep_save(self, value, connection):
