@@ -8,6 +8,7 @@ from django.db import connection
     
 from multitenant_backend import models
 from django.core import exceptions as djangoexceptions
+from multitenant_backend.settings import CREATE_MISSING_TENANT
 
 import logging
 import uuid
@@ -57,12 +58,15 @@ class ThreadLocals(object):
             logging.info("try to find user profile")
             
             email = user.email
-            domainSplit = email.split("@")
+            domain = email.split("@")[1]
             
-            tenant, created = models.Tenant.objects.update_or_create(name=domainSplit[1], defaults={
-                'name':domainSplit[1],
-                'email':email
-            })
+            if(CREATE_MISSING_TENANT):
+                tenant, created = models.Tenant.objects.update_or_create(name=domain, defaults={
+                    'name':domain,
+                    'email':email
+                })
+            else:
+                tenant = models.Tenant.objects.get(name=domain)
             
             set_current_tenant(tenant)
             
@@ -79,7 +83,7 @@ class ThreadLocals(object):
                     )
                     
             except djangoexceptions.ObjectDoesNotExist:
-                logger.debug(domainSplit)
+                logger.debug(domain)
                 
                 userprofile = models.UserProfile(user=user,
                     tenant=tenant)
